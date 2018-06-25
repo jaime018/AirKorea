@@ -9,7 +9,6 @@ var width = 550,
     height = 570,
 	svg,
 	centered,
-	mcentered,
 	map,
 	points,
 	path,
@@ -90,7 +89,7 @@ function makeGraphs(error, projectsJson,csvJson) {
          .enter().append('path') 
            .attr('class', function(d) { console.log(); return 'province c' + d.properties.code }) 
            .attr('d', path) 
-		   .on("click", mclicked)
+		   .on("click", clicked)
      }); 
 	
 	
@@ -151,7 +150,6 @@ function clicked(d) {
     y = height / 2;
     k = 1;
     centered = null;
-	mcentered = null;
   }
   
   //Circle등 path가 없는 경우 projection으로 처리
@@ -170,20 +168,26 @@ function clicked(d) {
 				return element.name===d.properties.name_eng;
 			
 			}).name_service;
- 
- 
-	  
-  //-- 버튼클릭시 뒷배경
-  map.selectAll("path")
-      .classed("active", centered && function(d) {
-      //console.log("t " + d.properties.name_eng.toLowerCase() + ' ' + centered.name.toLowerCase())
-      return (d.properties.name_eng.toLowerCase().search(centered.name.toLowerCase()) > -1); });
+
+			
+			
+	 if(typeof d.properties == "undefined")
+	 {			
+		map.selectAll("path")
+			  .classed("active", centered && function(d) {
+			  return (d.properties.name_eng.toLowerCase().search(centered.name.toLowerCase()) > -1); });
+	 }else
+	 {
+		   map.selectAll("path")
+		  .classed("active", centered && function(d) { return d === centered; });
+	 }
+	
 
   map.transition()
       .duration(750)
       .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
       .style("stroke-width", 1.5 / k + "px");
-    
+	  
 
   points.selectAll("path")
       .classed("active", centered && function(d) { return d === centered; });
@@ -232,75 +236,6 @@ function clicked(d) {
 
 }
 
-function mclicked(d) {
-  var x, y, k;
-    //console.log(d.properties.name)
-  if (d && mcentered !== d) {
-    var centroid = path.centroid(d);
-    x = centroid[0];
-    y = centroid[1];
-    k = 4;
-    mcentered = d;
-  } else {
-    x = width / 2;
-    y = height / 2;
-    k = 1;
-    mcentered = null;
-    centered = null;
-  }
-
-  map.selectAll("path")
-      .classed("active", mcentered && function(d) { return d === mcentered; });
-
-  map.transition()
-      .duration(750)
-      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
-      .style("stroke-width", 1.5 / k + "px");
-    
-  points.selectAll("path")
-      .classed("active", centered && function(d) { return d === centered; });
-
-  points.transition()
-      .duration(750)
-      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
-      .style("stroke-width", 1.5 / k + "px");
-	  
-  if (d && centered !== d) 
-   {
-	    $('#chart1Title').html('PM10 정보 그래프(이전 24시간 평균 데이터)');  
-		drawAllProvince();
-   }else
-   {
-	   $('#chart1Title').html('지역별 PM10 분포도');
-	   d3.json( "/weather/getCtprvnDataList/"+sido_name, function(error, data) { 
-	 
-				var ndx = crossfilter(data.list);
-		
-				cityChartDimension = ndx.dimension(function (d) {
-					return d.cityName;
-				})
-				dataGroup = cityChartDimension.group().reduceSum(function (d) {
-					return d.pm10Value;
-				})
-
-				
-				//console.log(cityChartDimension);
-				//PM10 차트의 값을 기준으로 Grouping
-				var timeChart = dc.rowChart("#time-chart");
-				//console.log(dateDimGroup);
-				timeChart
-					.width(600)
-					.height(570)
-					.dimension(cityChartDimension)
-					.group(dataGroup)
-					.xAxis().ticks(4);
-					
-					
-				dc.renderAll();
-	 });
-   }
-	  
-}
 
 //모든 시군의 데이터 보여주기
 function drawAllProvince()
