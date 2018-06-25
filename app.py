@@ -9,10 +9,6 @@ app = Flask(__name__)
 @app.route("/")
 def index():
      return render_template("AirKorea.html")
-
-@app.route("/GeoKorea")
-def GeoKorea():
-    return render_template("GeoKorea.html")
 	
 @app.route("/AirKorea")
 def AirKorea():
@@ -48,4 +44,4 @@ def weather_getCtprvnDataList(sido_name):
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0',port=5000,debug=True)
+    app.run(host='0.0.0.0',port=80,debug=True)
