@@ -1,8 +1,6 @@
 from flask import Flask, redirect, url_for, request, jsonify
 from flask import render_template
 import json
-from bson import json_util
-from bson.json_util import dumps
 from urllib.request import Request, urlopen
 from urllib.parse import urlencode, quote_plus
 
